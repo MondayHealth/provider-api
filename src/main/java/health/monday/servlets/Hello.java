@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet(name = "HelloServlet", urlPatterns = {"/hello"}, loadOnStartup = 1)
@@ -59,8 +60,9 @@ public class Hello extends HttpServlet
 			throws IOException, ServletException
 	{
 		getUser(request);
-		final Map<String, String> res =
-				Map.of("user", this.userName, "email", this.userEmail);
+		final Map<String, String> res = new HashMap<>();
+		res.put("user", this.userName);
+		res.put("email", this.userEmail);
 		final Gson g = new Gson();
 		response.getWriter().print(g.toJson(new Return(res)));
 	}

@@ -6,7 +6,7 @@
     <deployment>
       <artifact name="Gradle : health.monday.tools : provider-api-1.0-SNAPSHOT.war">
         <settings>
-          <option name="CONTEXT_PATH" value="/" />
+          <option name="CONTEXT_PATH" value="/api/1" />
         </settings>
       </artifact>
     </deployment>

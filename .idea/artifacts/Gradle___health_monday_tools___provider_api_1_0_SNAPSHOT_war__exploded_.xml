@@ -16,6 +16,9 @@
           <element id="module-output" name="provider-api_main" />
           <element id="dir-copy" path="$PROJECT_DIR$/out/production/resources" />
         </element>
+        <element id="directory" name="lib">
+          <element id="library" level="project" name="Gradle: com.google.code.gson:gson:2.8.2" />
+        </element>
       </element>
     </root>
   </artifact>

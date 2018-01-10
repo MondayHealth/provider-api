@@ -17,7 +17,12 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="library" name="Gradle: org.jetbrains:annotations:15.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-web:2.10.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-core:2.10.0" level="project" />
+    <orderEntry type="library" name="Gradle: org.apache.logging.log4j:log4j-api:2.10.0" level="project" />
     <orderEntry type="library" name="Gradle: com.google.code.gson:gson:2.8.2" level="project" />
+    <orderEntry type="library" name="Gradle: org.postgresql:postgresql:42.1.4" level="project" />
     <orderEntry type="library" scope="PROVIDED" name="Gradle: javax.servlet:javax.servlet-api:4.0.0" level="project" />
   </component>
 </module>

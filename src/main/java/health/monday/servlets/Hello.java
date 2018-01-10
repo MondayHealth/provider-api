@@ -28,8 +28,8 @@ public class Hello extends HttpServlet
 			result = Collections.unmodifiableMap(res);
 		}
 
-		boolean success;
-		Map<String, String> result;
+		private boolean success;
+		private Map<String, String> result;
 	}
 
 	private void getUser(final HttpServletRequest request)

@@ -21,6 +21,18 @@ Application Servers` then add a Tomcat server (not Tomcat EE). Use
 `/usr/local/Cellar/tomcat/VERSION/libexec` as the path.
 
 
+# Development
+### Postgres
+If `ENVIRONMENT` is set to `local`, we look for the
+`hostname.psql.properties` property file for db connection info. If you
+want to use RDS, forward a port using an SSH tunnel like this:
+
+```ssh -i ~/.ssh/monday-root.pem -L 9999:mp72vx2mjszadf.c4erhqsd8cq3.us-east-2.rds.amazonaws.com:5432 ec2-user@bastion.monday.health -N```
+
+where `mp72vx2mjszadf.c4erhqsd8cq3.us-east-2.rds.amazonaws.com` is the
+internal address of the db server you're trying to connect to.
+
+
 # Deploy script
 1. You need to have the root key in a known location
 2. `pip3 install requests[socks]` 

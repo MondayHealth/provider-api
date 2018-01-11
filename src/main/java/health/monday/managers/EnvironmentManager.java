@@ -3,6 +3,8 @@ package health.monday.managers;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 public class EnvironmentManager
@@ -17,6 +19,8 @@ public class EnvironmentManager
 	private static final Environment environment;
 
 	private static final Logger logger = LogManager.getLogger();
+
+	private static final String hostName;
 
 	private static Environment detectEnvironment()
 	{
@@ -47,8 +51,31 @@ public class EnvironmentManager
 		}
 	}
 
+	private static String detectHostname()
+	{
+		String name = null;
+
+		try
+		{
+			name = InetAddress.getLocalHost().getHostName();
+		}
+		catch (UnknownHostException e)
+		{
+			logger.error("Could not determine hostname for localhost: " +
+					e.getMessage());
+		}
+
+		if (name == null)
+		{
+			return "UNKNOWN";
+		}
+
+		return name;
+	}
+
 	static
 	{
+		hostName = detectHostname();
 		environment = detectEnvironment();
 		logger.info("Detected environment: " + environment);
 		instance = new EnvironmentManager();
@@ -67,5 +94,10 @@ public class EnvironmentManager
 	public final Environment getEnvironment()
 	{
 		return environment;
+	}
+
+	public final String getHostName()
+	{
+		return hostName;
 	}
 }

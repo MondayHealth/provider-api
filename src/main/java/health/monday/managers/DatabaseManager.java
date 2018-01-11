@@ -24,10 +24,21 @@ public class DatabaseManager
 	{
 		final EnvironmentManager em = EnvironmentManager.getInstance();
 		final Properties properties = new Properties();
+
+		String filePrefix;
+
+		switch (em.getEnvironment())
+		{
+			case LOCAL:
+				filePrefix = em.getHostName();
+				break;
+			default:
+				filePrefix = em.getEnvironment().toString();
+				break;
+		}
+
 		final String fileName =
-				String.format("/properties/%s.psql.properties", em
-						.getEnvironment()
-						.toString()
+				String.format("/properties/%s.psql.properties", filePrefix
 						.toLowerCase());
 
 		try

@@ -1,16 +1,19 @@
-package health.monday.servlets;
+package health.monday.servlets.providers;
 
 import health.monday.BaseServletHandler;
 import health.monday.exceptions.InvalidCertificateException;
+import health.monday.servlets.BaseHTTPServlet;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
-@WebServlet(name = "HelloServlet", urlPatterns = {"/hello"})
-public class Hello extends BaseHTTPServlet
+@WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
+public class ListProvidersServlet extends BaseHTTPServlet
 {
 	private class Handler extends BaseServletHandler
 	{
@@ -20,12 +23,20 @@ public class Hello extends BaseHTTPServlet
 			super(req, resp);
 		}
 
-		public void get() throws IOException
+		public void get() throws IOException, SQLException
 		{
-			final HashMap<String, String> result = new HashMap<>();
-			result.put("name", userName);
-			result.put("email", emailAddress);
-			success(result);
+			initDBConnection();
+			Statement s = connection.createStatement();
+			ResultSet r =
+					s.executeQuery("SELECT COUNT(*) FROM monday.provider");
+
+			if (!r.next())
+			{
+				failure(0);
+				return;
+			}
+
+			success(r.getInt(1));
 		}
 	}
 

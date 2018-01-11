@@ -11,40 +11,18 @@ import java.util.Properties;
 
 public class DatabaseManager
 {
-	@org.jetbrains.annotations.Nullable
-	private static DatabaseManager instance;
+	private static DatabaseManager instance = new DatabaseManager();
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private final Properties properties;
+	static private final Properties properties;
 
-	private final String url;
+	static private final String url;
 
-	public static DatabaseManager getInstance()
+	static
 	{
-		return instance;
-	}
-
-	public static void initialize()
-	{
-		if (instance != null)
-		{
-			throw new IllegalStateException("Attempt to double initialize.");
-		}
-
-		logger.info("Initializing.");
-
-		try
-		{
-			Class.forName("org.postgresql.Driver");
-		}
-		catch (ClassNotFoundException e)
-		{
-			throw new RuntimeException("Could not load the psql driver.");
-		}
-
 		final EnvironmentManager em = EnvironmentManager.getInstance();
-		final Properties properties = new Properties();
+		properties = new Properties();
 		final String fileName =
 				String.format("/properties/%s.psql.properties", em
 						.getEnvironment()
@@ -63,29 +41,39 @@ public class DatabaseManager
 					.getMessage()));
 		}
 
-		final DatabaseManager inst = new DatabaseManager(properties);
-
-		instance = inst;
+		url = properties.getProperty("url");
 	}
 
-	public static void destroy()
+	public static DatabaseManager getInstance()
+	{
+		return instance;
+	}
+
+	public void initialize()
+	{
+		logger.info("Initializing.");
+
+		try
+		{
+			Class.forName("org.postgresql.Driver");
+		}
+		catch (ClassNotFoundException e)
+		{
+			throw new RuntimeException("Could not load the psql driver.");
+		}
+	}
+
+	public void destroy()
 	{
 		logger.info("Destroying.");
-		instance = null;
 	}
 
-	private DatabaseManager(final Properties props)
+	private DatabaseManager()
 	{
-		properties = props;
-		url = properties.getProperty("url");
 	}
 
 	public Connection newConnection() throws SQLException
 	{
-		final Connection ret = DriverManager.getConnection(url, properties);
-		return ret;
+		return DriverManager.getConnection(url, properties);
 	}
-
-
-
 }

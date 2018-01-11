@@ -1,7 +1,6 @@
 package health.monday.servlets;
 
 import health.monday.managers.DatabaseManager;
-import health.monday.managers.EnvironmentManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -17,13 +16,12 @@ public class ContextListener implements ServletContextListener
 	@Override
 	public void contextInitialized(ServletContextEvent contextEvent)
 	{
-		EnvironmentManager.initialize();
-		DatabaseManager.initialize();
+		DatabaseManager.getInstance().initialize();
 	}
 
 	@Override
 	public void contextDestroyed(ServletContextEvent contextEvent)
 	{
-		DatabaseManager.destroy();
+		DatabaseManager.getInstance().destroy();
 	}
 }

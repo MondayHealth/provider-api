@@ -12,16 +12,16 @@ public class EnvironmentManager
 		LOCAL, PRODUCTION
 	}
 
-	private static EnvironmentManager instance;
+	private static final EnvironmentManager instance;
 
-	private final Environment environment;
-
-	private static final String ENV_KEY = "ENVIRONMENT";
+	private static final Environment environment;
 
 	private static final Logger logger = LogManager.getLogger();
 
 	private static Environment detectEnvironment()
 	{
+		final String ENV_KEY = "ENVIRONMENT";
+
 		Map<String, String> env = System.getenv();
 
 		if (!env.containsKey(ENV_KEY))
@@ -47,16 +47,16 @@ public class EnvironmentManager
 		}
 	}
 
-	public static void initialize()
+	static
 	{
-		final Environment env = detectEnvironment();
-		logger.info("Detected environment: " + env);
-		instance = new EnvironmentManager(env);
+		environment = detectEnvironment();
+		logger.info("Detected environment: " + environment);
+		instance = new EnvironmentManager();
 	}
 
-	private EnvironmentManager(final Environment env)
+	private EnvironmentManager()
 	{
-		environment = env;
+
 	}
 
 	public static EnvironmentManager getInstance()

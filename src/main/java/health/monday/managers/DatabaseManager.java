@@ -41,6 +41,8 @@ public class DatabaseManager
 				String.format("/properties/%s.psql.properties", filePrefix
 						.toLowerCase());
 
+		logger.debug("Properties filename: " + fileName);
+
 		try
 		{
 			properties.load(DatabaseManager.class.getResourceAsStream

@@ -1,15 +1,13 @@
-package health.monday;
+package health.monday.servlets;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import health.monday.exceptions.InvalidCertificateException;
-import health.monday.managers.DatabaseManager;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
@@ -30,8 +28,6 @@ abstract public class BaseServletHandler
 
 	private static ResourceBundle lStrings =
 			ResourceBundle.getBundle(LSTRING_FILE);
-
-	protected Connection connection = null;
 
 	private class Response
 	{
@@ -124,15 +120,5 @@ abstract public class BaseServletHandler
 	private void respond(final Object result) throws IOException
 	{
 		response.getWriter().print(serializer.toJson(result));
-	}
-
-	protected void initDBConnection() throws SQLException
-	{
-		if (connection != null)
-		{
-			throw new IllegalStateException("Double initialization.");
-		}
-
-		connection = DatabaseManager.getInstance().newConnection();
 	}
 }

@@ -1,11 +1,12 @@
 package health.monday.managers;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
@@ -15,14 +16,14 @@ public class DatabaseManager
 
 	private static final Logger logger = LogManager.getLogger();
 
-	static private final Properties properties;
+	static private final HikariConfig config;
 
-	static private final String url;
+	private HikariDataSource dataSource = null;
 
 	static
 	{
 		final EnvironmentManager em = EnvironmentManager.getInstance();
-		properties = new Properties();
+		final Properties properties = new Properties();
 		final String fileName =
 				String.format("/properties/%s.psql.properties", em
 						.getEnvironment()
@@ -41,7 +42,7 @@ public class DatabaseManager
 					.getMessage()));
 		}
 
-		url = properties.getProperty("url");
+		config = new HikariConfig(properties);
 	}
 
 	public static DatabaseManager getInstance()
@@ -61,6 +62,8 @@ public class DatabaseManager
 		{
 			throw new RuntimeException("Could not load the psql driver.");
 		}
+
+		dataSource = new HikariDataSource(config);
 	}
 
 	public void destroy()
@@ -72,8 +75,13 @@ public class DatabaseManager
 	{
 	}
 
-	public Connection newConnection() throws SQLException
+	private HikariDataSource getDataSource()
 	{
-		return DriverManager.getConnection(url, properties);
+		return dataSource;
+	}
+
+	public static Connection connection() throws SQLException
+	{
+		return instance.getDataSource().getConnection();
 	}
 }

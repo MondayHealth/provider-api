@@ -17,12 +17,14 @@
           <element id="dir-copy" path="$PROJECT_DIR$/out/production/resources" />
         </element>
         <element id="directory" name="lib">
+          <element id="library" level="project" name="Gradle: org.jetbrains:annotations:15.0" />
           <element id="library" level="project" name="Gradle: org.apache.logging.log4j:log4j-web:2.10.0" />
           <element id="library" level="project" name="Gradle: org.apache.logging.log4j:log4j-core:2.10.0" />
           <element id="library" level="project" name="Gradle: org.apache.logging.log4j:log4j-api:2.10.0" />
           <element id="library" level="project" name="Gradle: com.google.code.gson:gson:2.8.2" />
           <element id="library" level="project" name="Gradle: org.postgresql:postgresql:42.1.4" />
-          <element id="file-copy" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/15.0/d40ab99147584cf6cfb5245be67b3fee2c7220f9/annotations-15.0.jar" />
+          <element id="file-copy" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.zaxxer/HikariCP/2.7.4/c101cbc2d07c0adffa0857e742229ef785892699/HikariCP-2.7.4.jar" />
+          <element id="file-copy" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/1.7.25/da76ca59f6a57ee3102f8f9bd9cee742973efa8a/slf4j-api-1.7.25.jar" />
         </element>
       </element>
     </root>

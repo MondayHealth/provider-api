@@ -62,6 +62,12 @@ abstract public class BaseServletHandler
 		response = resp;
 
 		final String cert = request.getHeader("x-ssl-s-dn");
+
+		if (cert == null)
+		{
+			throw new InvalidCertificateException("(null)");
+		}
+
 		final String[] tokens = cert.split(",");
 		final String[] emailTokens = tokens[0].split("=");
 		final String[] commonNameTokens = tokens[1].split("=");

@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
@@ -43,10 +44,18 @@ public class DatabaseManager
 
 		logger.debug("Properties filename: " + fileName);
 
+		InputStream resource =
+				DatabaseManager.class.getResourceAsStream(fileName);
+
+		if (resource == null)
+		{
+			throw new RuntimeException("Could not find property file " +
+					fileName);
+		}
+
 		try
 		{
-			properties.load(DatabaseManager.class.getResourceAsStream
-					(fileName));
+			properties.load(resource);
 		}
 		catch (IOException e)
 		{

@@ -14,8 +14,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-@WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
-public class ListProvidersServlet extends BaseHTTPServlet
+@WebServlet(name = "CountProviders", urlPatterns = {"/providers/count"})
+public class CountProvidersServlet extends BaseHTTPServlet
 {
 	private class Handler extends BaseServletHandler
 	{
@@ -27,25 +27,23 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		public void get() throws IOException, SQLException
 		{
-			final int count = 1000;
-			final String[] result = new String[count];
-			final int offset = 10000;
+			int count;
 			try (final Connection conn = DatabaseManager.connection())
 			{
 				Statement s = conn.createStatement();
-				ResultSet r = s.executeQuery("SELECT first_name " +
-						"FROM monday.provider " +
-						"ORDER BY last_name DESC " +
-						"LIMIT 1000 OFFSET 10000");
+				ResultSet r =
+						s.executeQuery("SELECT COUNT(*) FROM monday.provider");
 
-				int i = 0;
-				while (r.next())
+				if (!r.next())
 				{
-					result[i] = r.getString(1);
+					failure(0);
+					return;
 				}
+
+				count = r.getInt(1);
 			}
 
-			success(result);
+			success(count);
 		}
 	}
 

@@ -5,9 +5,11 @@ import java.sql.SQLException;
 
 public class Provider
 {
-	public final long id;
-	public final String firstName;
-	public final String lastName;
+	private final long id;
+
+	private final String firstName;
+
+	private final String lastName;
 
 	public Provider(final ResultSet r) throws SQLException
 	{

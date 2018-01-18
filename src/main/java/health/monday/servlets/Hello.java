@@ -22,8 +22,8 @@ public class Hello extends BaseHTTPServlet
 		public void get() throws IOException
 		{
 			final HashMap<String, String> result = new HashMap<>();
-			result.put("name", userName);
-			result.put("email", emailAddress);
+			result.put("name", getUserName());
+			result.put("email", getEmailAddress());
 			success(result);
 		}
 	}

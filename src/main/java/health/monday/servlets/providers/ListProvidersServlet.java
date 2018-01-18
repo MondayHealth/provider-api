@@ -6,6 +6,7 @@ import health.monday.models.Provider;
 import health.monday.servlets.BaseHTTPServlet;
 import health.monday.servlets.BaseServletHandler;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,11 +29,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				"ORDER BY last_name DESC " +
 				"LIMIT ? OFFSET ?";
 
-		public void get() throws IOException, SQLException
+		public void get() throws IOException, SQLException, ServletException
 		{
-			final int count = 1000;
+			final int count = requireInt("count");
+			final int offset = requireInt("offset");
 			final Provider[] result = new Provider[count];
-			final int offset = 10000;
 			try (final Connection conn = DatabaseManager.connection())
 			{
 				PreparedStatement s = conn.prepareStatement(query);

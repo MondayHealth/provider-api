@@ -13,9 +13,9 @@ import java.util.ResourceBundle;
 
 abstract public class BaseServletHandler
 {
-	public final String emailAddress;
+	private final String emailAddress;
 
-	public final String userName;
+	private final String userName;
 
 	private final HttpServletRequest request;
 
@@ -28,6 +28,16 @@ abstract public class BaseServletHandler
 
 	private static ResourceBundle lStrings =
 			ResourceBundle.getBundle(LSTRING_FILE);
+
+	String getEmailAddress()
+	{
+		return emailAddress;
+	}
+
+	String getUserName()
+	{
+		return userName;
+	}
 
 	private class Response
 	{
@@ -126,5 +136,34 @@ abstract public class BaseServletHandler
 	private void respond(final Object result) throws IOException
 	{
 		response.getWriter().print(serializer.toJson(result));
+	}
+
+	protected String requireParameter(final String name) throws
+			ServletException
+	{
+		final String ret = request.getParameter(name);
+		if (ret == null)
+		{
+			throw new ServletException("Missing required parameter: " + name);
+		}
+		return ret;
+	}
+
+	protected int requireInt(final String name) throws ServletException
+	{
+		return Integer.parseInt(requireParameter(name));
+	}
+
+	protected String stringParameter(final String name,
+									 final String defaultValue)
+	{
+		final String ret = request.getParameter(name);
+		return ret == null ? defaultValue : ret;
+	}
+
+	protected int intParameter(final String name, final int defaultValue)
+	{
+		final String ret = request.getParameter(name);
+		return ret == null ? defaultValue : Integer.parseInt(ret);
 	}
 }

@@ -11,7 +11,10 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 @WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
 public class ListProvidersServlet extends BaseHTTPServlet
@@ -24,10 +27,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			super(req, resp);
 		}
 
-		private final String query = "SELECT id, first_name, last_name " +
-				"FROM monday.provider " +
-				"ORDER BY last_name DESC " +
-				"LIMIT ? OFFSET ?";
+		private final String query =
+				"SELECT id, first_name, last_name, website_url " +
+						"FROM monday.provider " +
+						"ORDER BY last_name DESC " +
+						"LIMIT ? OFFSET ?";
 
 		public void get() throws IOException, SQLException, ServletException
 		{

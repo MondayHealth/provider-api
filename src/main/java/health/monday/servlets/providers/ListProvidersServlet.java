@@ -27,22 +27,53 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			super(req, resp);
 		}
 
-		private final String query =
-				"SELECT id, first_name, last_name, website_url " +
-						"FROM monday.provider " +
-						"ORDER BY last_name DESC " +
-						"LIMIT ? OFFSET ?";
+		private final String queryPrefix =
+				"SELECT DISTINCT p.id, p.first_name, p.last_name, p" +
+						".website_url, array_agg(pc.credential_id) AS " +
+						"credentials " +
+						"FROM monday.provider p " +
+						"JOIN monday.providers_credentials pc ON p.id = pc" +
+						".provider_id ";
+
+		private final String filterByPayorJoins =
+				"JOIN monday.providers_plans pp ON p.id = pp.provider_id " +
+						"JOIN monday.plan plan ON pp.plan_id = plan.id ";
+
+		private final String filterByPayorWhere = "WHERE plan.payor_id = ? ";
+
+		private final String querySuffix = "GROUP BY p.id " +
+				"ORDER BY p.last_name ASC " +
+				"LIMIT ? OFFSET ?";
 
 		public void get() throws IOException, SQLException, ServletException
 		{
 			final int count = requireInt("count");
 			final int offset = requireInt("offset");
+			final int payor = intParameter("payor", 0);
 			final Provider[] result = new Provider[count];
+
+			String query = queryPrefix;
+
+			if (payor > 0)
+			{
+				query += filterByPayorJoins;
+				query += filterByPayorWhere;
+			}
+
+			query += querySuffix;
+
 			try (final Connection conn = DatabaseManager.connection())
 			{
+				int idx = 1;
 				PreparedStatement s = conn.prepareStatement(query);
-				s.setInt(1, count);
-				s.setInt(2, offset);
+
+				if (payor > 0)
+				{
+					s.setInt(idx++, payor);
+				}
+
+				s.setInt(idx++, count);
+				s.setInt(idx, offset);
 				ResultSet r = s.executeQuery();
 
 				int i = 0;

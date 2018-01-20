@@ -1,6 +1,5 @@
 package health.monday.managers;
 
-import com.google.gson.Gson;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -8,6 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -21,8 +21,12 @@ public class FixtureManager
 	private static final String PAYOR_NAMES_QUERY =
 			"SELECT	id, name FROM monday.payor";
 
-	private ConcurrentHashMap<Integer, String> payors =
-			new ConcurrentHashMap<>();
+	private static final String CRED_NAMES_QUERY =
+			"SELECT id, ACRONYM FROM monday.credential";
+
+	private Map<Integer, String> payors = new HashMap<>();
+
+	private Map<Integer, String> credentials = new HashMap<>();
 
 	private FixtureManager()
 	{
@@ -31,8 +35,8 @@ public class FixtureManager
 
 	public synchronized void reloadFixtures() throws SQLException
 	{
-		final HashMap<Integer, String> newPayorNames =
-				new HashMap<>();
+		final HashMap<Integer, String> newPayorNames = new HashMap<>();
+		final HashMap<Integer, String> newCredNames = new HashMap<>();
 
 		try (final Connection conn = DatabaseManager.connection())
 		{
@@ -42,18 +46,29 @@ public class FixtureManager
 			{
 				newPayorNames.put(r.getInt(1), r.getString(2));
 			}
+
+			s = conn.prepareStatement(CRED_NAMES_QUERY);
+			r = s.executeQuery();
+			while (r.next())
+			{
+				newCredNames.put(r.getInt(1), r.getString(2));
+			}
 		}
 
-		payors = new ConcurrentHashMap<>(newPayorNames);
+		payors = new HashMap<>(newPayorNames);
+		credentials = new HashMap<>(newCredNames);
 
 		logger.info("Reloaded.");
 	}
 
 	public void initialize()
 	{
-		try {
+		try
+		{
 			reloadFixtures();
-		} catch (SQLException e) {
+		}
+		catch (SQLException e)
+		{
 			throw new RuntimeException("Failed: " + e.getMessage());
 		}
 	}
@@ -71,6 +86,11 @@ public class FixtureManager
 
 	public Map<Integer, String> getPayors()
 	{
-		return payors;
+		return Collections.unmodifiableMap(payors);
+	}
+
+	public Map<Integer, String> getCredentials()
+	{
+		return Collections.unmodifiableMap(credentials);
 	}
 }

@@ -25,7 +25,6 @@
           <element id="library" level="project" name="Gradle: com.google.code.gson:gson:2.8.2" />
           <element id="library" level="project" name="Gradle: org.postgresql:postgresql:42.1.4" />
           <element id="library" level="project" name="Gradle: org.slf4j:slf4j-api:1.7.25" />
-          <element id="file-copy" path="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.jooq/jooq/3.10.4/9a987cf106ab05014e3e83b4ce24b0a911aa039e/jooq-3.10.4.jar" />
         </element>
       </element>
     </root>

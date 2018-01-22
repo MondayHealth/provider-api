@@ -22,11 +22,16 @@ public class FixtureManager
 			"SELECT	id, name FROM monday.payor";
 
 	private static final String CRED_NAMES_QUERY =
-			"SELECT id, ACRONYM FROM monday.credential";
+			"SELECT id, acronym FROM monday.credential";
+
+	private static final String SPECIALTY_NAMES_QUERY =
+			"SELECT id, name FROM monday.specialty";
 
 	private Map<Integer, String> payors = new HashMap<>();
 
 	private Map<Integer, String> credentials = new HashMap<>();
+
+	private Map<Integer, String> specialties = new HashMap<>();
 
 	private FixtureManager()
 	{
@@ -35,28 +40,29 @@ public class FixtureManager
 
 	public synchronized void reloadFixtures() throws SQLException
 	{
-		final HashMap<Integer, String> newPayorNames = new HashMap<>();
-		final HashMap<Integer, String> newCredNames = new HashMap<>();
-
 		try (final Connection conn = DatabaseManager.connection())
 		{
 			PreparedStatement s = conn.prepareStatement(PAYOR_NAMES_QUERY);
 			ResultSet r = s.executeQuery();
 			while (r.next())
 			{
-				newPayorNames.put(r.getInt(1), r.getString(2));
+				payors.put(r.getInt(1), r.getString(2));
 			}
 
 			s = conn.prepareStatement(CRED_NAMES_QUERY);
 			r = s.executeQuery();
 			while (r.next())
 			{
-				newCredNames.put(r.getInt(1), r.getString(2));
+				credentials.put(r.getInt(1), r.getString(2));
+			}
+
+			s = conn.prepareStatement(SPECIALTY_NAMES_QUERY);
+			r = s.executeQuery();
+			while (r.next())
+			{
+				specialties.put(r.getInt(1), r.getString(2));
 			}
 		}
-
-		payors = new HashMap<>(newPayorNames);
-		credentials = new HashMap<>(newCredNames);
 
 		logger.info("Reloaded.");
 	}
@@ -76,7 +82,9 @@ public class FixtureManager
 	public void destroy()
 	{
 		logger.info("Destroying");
-		payors = new ConcurrentHashMap<>();
+		payors = new HashMap<>();
+		credentials = new HashMap<>();
+		specialties = new HashMap<>();
 	}
 
 	public static FixtureManager getInstance()
@@ -92,5 +100,10 @@ public class FixtureManager
 	public Map<Integer, String> getCredentials()
 	{
 		return Collections.unmodifiableMap(credentials);
+	}
+
+	public Map<Integer, String> getSpecialties()
+	{
+		return Collections.unmodifiableMap(specialties);
 	}
 }

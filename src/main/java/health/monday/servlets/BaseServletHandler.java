@@ -95,6 +95,9 @@ abstract public class BaseServletHandler
 		}
 
 		userName = commonNameTokens[1];
+
+		response.setCharacterEncoding("utf-8");
+		response.setContentType("application/json");
 	}
 
 	private void responseNotAllowed() throws IOException

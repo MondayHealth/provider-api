@@ -5,6 +5,11 @@ import health.monday.managers.DatabaseManager;
 import health.monday.models.Provider;
 import health.monday.servlets.BaseHTTPServlet;
 import health.monday.servlets.BaseServletHandler;
+import org.jooq.DSLContext;
+import org.jooq.SQLDialect;
+import org.jooq.impl.DSL;
+
+import static org.jooq.impl.DSL.*;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -62,8 +67,12 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			query += querySuffix;
 
+			final DSLContext create = DSL.using(SQLDialect.POSTGRES_9_5);
+			final String q = create.select(field("provider.id")).getSQL();
+
 			try (final Connection conn = DatabaseManager.connection())
 			{
+
 				int idx = 1;
 				PreparedStatement s = conn.prepareStatement(query);
 

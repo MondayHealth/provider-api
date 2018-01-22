@@ -70,13 +70,15 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int payor = intParameter("payor", 0);
 			final Provider[] result = new Provider[count];
 
-			final String query;
+			String query = providerQuery + " ";
 			if (payor > 0)
 			{
-				query = providerByPayorQuery;
-			} else {
-				query = providerQuery;
+				query += "WHERE pro.id IN (";
+				query += providerByPayorQuery;
+				query += ") ";
 			}
+
+			query += "ORDER BY pro.last_name ASC LIMIT ? OFFSET ?";
 
 			try (final Connection conn = DatabaseManager.connection())
 			{

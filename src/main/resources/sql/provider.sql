@@ -1,12 +1,12 @@
-SELECT DISTINCT
+SELECT
   pro.id,
   pro.first_name,
   pro.last_name,
   pro.website_url,
-  array_agg(pro_creds.credential_id) AS credentials
+  ARRAY(SELECT pc.credential_id
+        FROM monday.providers_credentials pc
+        WHERE pc.provider_id = pro.id) AS credentials,
+  ARRAY(SELECT ps.specialty_id
+        FROM monday.providers_specialties ps
+        WHERE ps.provider_id = pro.id) AS specialties
 FROM monday.provider pro
-  JOIN monday.providers_credentials pro_creds ON pro.id = pro_creds.provider_id
-GROUP BY pro.id
-ORDER BY pro.last_name ASC
-LIMIT ?
-OFFSET ?

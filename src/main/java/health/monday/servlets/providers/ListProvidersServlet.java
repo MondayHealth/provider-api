@@ -5,6 +5,8 @@ import health.monday.managers.DatabaseManager;
 import health.monday.models.Provider;
 import health.monday.servlets.BaseHTTPServlet;
 import health.monday.servlets.BaseServletHandler;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -20,10 +22,13 @@ import java.sql.SQLException;
 @WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
 public class ListProvidersServlet extends BaseHTTPServlet
 {
+	private static final Logger logger = LogManager.getLogger();
 
 	private static final String providerQuery;
 
 	private static final String providerByPayorQuery;
+
+	private static final String providerBySpecialtyQuery;
 
 	static String convertStreamToString(java.io.InputStream is)
 	{
@@ -52,6 +57,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 	{
 		providerQuery = loadFile("/sql/provider.sql");
 		providerByPayorQuery = loadFile("/sql/provider-by-payor.sql");
+		providerBySpecialtyQuery = loadFile("/sql/provider-by-specialty.sql");
 	}
 
 	private class Handler extends BaseServletHandler
@@ -68,17 +74,27 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int count = requireInt("count");
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
+			final int specialty = intParameter("specialty", 0);
 			final Provider[] result = new Provider[count];
 
-			String query = providerQuery + " ";
+			String query = providerQuery;
+
 			if (payor > 0)
 			{
-				query += "WHERE pro.id IN (";
+				query += " WHERE pro.id IN (";
 				query += providerByPayorQuery;
 				query += ") ";
 			}
 
-			query += "ORDER BY pro.last_name ASC LIMIT ? OFFSET ?";
+			if (specialty > 0)
+			{
+				query += payor > 0 ? " AND " : " WHERE ";
+				query += " pro.id IN (";
+				query += providerBySpecialtyQuery;
+				query += ") ";
+			}
+
+			query += " ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
 
 			try (final Connection conn = DatabaseManager.connection())
 			{
@@ -89,6 +105,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				if (payor > 0)
 				{
 					s.setInt(idx++, payor);
+				}
+
+				if (specialty > 0)
+				{
+					s.setInt(idx++, specialty);
 				}
 
 				s.setInt(idx++, count);

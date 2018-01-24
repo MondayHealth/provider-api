@@ -169,4 +169,10 @@ abstract public class BaseServletHandler
 		final String ret = request.getParameter(name);
 		return ret == null ? defaultValue : Integer.parseInt(ret);
 	}
+
+	protected Integer intOrNullParameter(final String name)
+	{
+		final String ret = request.getParameter(name);
+		return ret == null ? null : Integer.parseInt(ret);
+	}
 }

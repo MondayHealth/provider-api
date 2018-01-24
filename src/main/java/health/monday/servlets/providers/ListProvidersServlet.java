@@ -75,7 +75,14 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
+			final Integer lat = intOrNullParameter("lat");
+			final Integer lng = intOrNullParameter("lng");
 			final Provider[] result = new Provider[count];
+
+			if (lat == null ^ lng == null)
+			{
+				throw new SQLException("Invalid lat/lng pair.");
+			}
 
 			String query = providerQuery;
 

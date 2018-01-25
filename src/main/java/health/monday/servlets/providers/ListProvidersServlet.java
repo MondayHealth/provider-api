@@ -32,6 +32,12 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerByCoordinate;
 
+	private static final double MILE_IN_METERS = 1609.34;
+
+	private static final double MIN_RADIUS_METERS = 500;
+
+	private static final double MAX_RADIUS_METERS = MILE_IN_METERS * 100;
+
 	static String convertStreamToString(java.io.InputStream is)
 	{
 		java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
@@ -74,18 +80,28 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		public void get() throws IOException, SQLException, ServletException
 		{
-			final double radiusInMeters = 1609.34;
 			final int count = requireInt("count");
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
 			final Double lat = doubleOrNullParameter("lat");
 			final Double lng = doubleOrNullParameter("lng");
+			final Double radius = doubleParameter("radius", MILE_IN_METERS);
 			final Provider[] result = new Provider[count];
 
 			if (lat == null ^ lng == null)
 			{
 				throw new SQLException("Invalid lat/lng pair.");
+			}
+
+			if (radius > MAX_RADIUS_METERS)
+			{
+				throw new SQLException("Radius too large: " + radius);
+			}
+
+			if (radius < MIN_RADIUS_METERS)
+			{
+				throw new SQLException("Radius too small: " + radius);
 			}
 
 			String query = providerQuery;
@@ -135,7 +151,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				{
 					s.setDouble(idx++, lat);
 					s.setDouble(idx++, lng);
-					s.setDouble(idx++, radiusInMeters);
+					s.setDouble(idx++, radius);
 				}
 
 				s.setInt(idx++, count);

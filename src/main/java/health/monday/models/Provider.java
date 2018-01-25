@@ -18,6 +18,8 @@ public class Provider
 
 	private final Integer[] specialties;
 
+	private final Address[] addresses;
+
 	public Provider(final ResultSet r) throws SQLException
 	{
 		id = r.getLong("id");
@@ -30,5 +32,22 @@ public class Provider
 
 		a = r.getArray("specialties");
 		specialties = (Integer[]) a.getArray();
+
+		a = r.getArray("addresses");
+		String[] addys = (String[]) a.getArray();
+		addresses = new Address[addys.length];
+		int idx = 0;
+		for (final String addy : addys)
+		{
+			if (addy == null || addy.isEmpty())
+			{
+				continue;
+			}
+
+			String[] tokens = addy.split("\\|");
+			final double lat = Double.parseDouble(tokens[1]);
+			final double lng = Double.parseDouble(tokens[2]);
+			addresses[idx++] = new Address(tokens[0], lat, lng);
+		}
 	}
 }

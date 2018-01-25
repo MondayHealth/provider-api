@@ -170,9 +170,9 @@ abstract public class BaseServletHandler
 		return ret == null ? defaultValue : Integer.parseInt(ret);
 	}
 
-	protected Integer intOrNullParameter(final String name)
+	protected Double doubleOrNullParameter(final String name)
 	{
 		final String ret = request.getParameter(name);
-		return ret == null ? null : Integer.parseInt(ret);
+		return ret == null ? null : Double.parseDouble(ret);
 	}
 }

@@ -30,6 +30,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerBySpecialtyQuery;
 
+	private static final String providerByCoordinate;
+
 	static String convertStreamToString(java.io.InputStream is)
 	{
 		java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
@@ -58,6 +60,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		providerQuery = loadFile("/sql/provider.sql");
 		providerByPayorQuery = loadFile("/sql/provider-by-payor.sql");
 		providerBySpecialtyQuery = loadFile("/sql/provider-by-specialty.sql");
+		providerByCoordinate = loadFile("/sql/provider-by-coord.sql");
 	}
 
 	private class Handler extends BaseServletHandler
@@ -71,12 +74,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		public void get() throws IOException, SQLException, ServletException
 		{
+			final double radiusInMeters = 1609.34;
 			final int count = requireInt("count");
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
-			final Integer lat = intOrNullParameter("lat");
-			final Integer lng = intOrNullParameter("lng");
+			final Double lat = doubleOrNullParameter("lat");
+			final Double lng = doubleOrNullParameter("lng");
 			final Provider[] result = new Provider[count];
 
 			if (lat == null ^ lng == null)
@@ -101,6 +105,14 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				query += ") ";
 			}
 
+			if (lat != null)
+			{
+				query += (payor > 0 || specialty > 0) ? " AND " : " WHERE ";
+				query += " pro.id IN (";
+				query += providerByCoordinate;
+				query += ") ";
+			}
+
 			query += " ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
 
 			try (final Connection conn = DatabaseManager.connection())
@@ -117,6 +129,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				if (specialty > 0)
 				{
 					s.setInt(idx++, specialty);
+				}
+
+				if (lat != null)
+				{
+					s.setDouble(idx++, lat);
+					s.setDouble(idx++, lng);
+					s.setDouble(idx++, radiusInMeters);
 				}
 
 				s.setInt(idx++, count);

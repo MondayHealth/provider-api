@@ -36,7 +36,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final double MIN_RADIUS_METERS = 500;
 
-	private static final double MAX_RADIUS_METERS = MILE_IN_METERS * 100;
+	private static final double MAX_RADIUS_METERS = MILE_IN_METERS * 50;
 
 	static String convertStreamToString(java.io.InputStream is)
 	{
@@ -116,7 +116,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (specialty > 0)
 			{
 				query += payor > 0 ? " AND " : " WHERE ";
-				query += " pro.id IN (";
+				query += "pro.id IN (";
 				query += providerBySpecialtyQuery;
 				query += ") ";
 			}
@@ -124,7 +124,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (lat != null)
 			{
 				query += (payor > 0 || specialty > 0) ? " AND " : " WHERE ";
-				query += " pro.id IN (";
+				query += "pro.id IN (";
 				query += providerByCoordinate;
 				query += ") ";
 			}
@@ -156,6 +156,9 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 				s.setInt(idx++, count);
 				s.setInt(idx, offset);
+
+				logger.debug(s);
+
 				ResultSet r = s.executeQuery();
 
 				int i = 0;

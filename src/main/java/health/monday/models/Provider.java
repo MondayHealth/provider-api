@@ -45,8 +45,8 @@ public class Provider
 			}
 
 			String[] tokens = addy.split("\\|");
-			final double lat = Double.parseDouble(tokens[1]);
-			final double lng = Double.parseDouble(tokens[2]);
+			final double lng = Double.parseDouble(tokens[1]);
+			final double lat = Double.parseDouble(tokens[2]);
 			addresses[idx++] = new Address(tokens[0], lat, lng);
 		}
 	}

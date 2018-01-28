@@ -42,7 +42,7 @@ class Deploy:
     def _start_tunnel(self) -> None:
         remote = "ec2-user@bastion.monday.health"
         local = "localhost:{}".format(self.PORT)
-        cmd = "ssh -N -D {} {}".format(local, remote)
+        cmd = "ssh -i {} -N -D {} {}".format(self.KEY, local, remote)
         parsed = shlex.split(cmd)
         self._tunnel = subprocess.Popen(parsed, shell=False)
         print("Tunnel started:", self._tunnel.pid)

@@ -149,8 +149,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 				if (lat != null)
 				{
-					s.setDouble(idx++, lat);
 					s.setDouble(idx++, lng);
+					s.setDouble(idx++, lat);
 					s.setDouble(idx++, radius);
 				}
 

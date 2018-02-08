@@ -152,6 +152,11 @@ abstract public class BaseServletHandler
 		return ret;
 	}
 
+	protected String[] getPathComponents()
+	{
+		return request.getPathInfo().split("/");
+	}
+
 	protected int requireInt(final String name) throws ServletException
 	{
 		return Integer.parseInt(requireParameter(name));

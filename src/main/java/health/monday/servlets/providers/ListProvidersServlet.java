@@ -38,35 +38,12 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final double MAX_RADIUS_METERS = MILE_IN_METERS * 50;
 
-	private static String convertStreamToString(java.io.InputStream is)
-	{
-		java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-		return s.hasNext() ? s.next() : "";
-	}
-
-	static private String loadFile(final String path)
-	{
-		try (InputStream r = DatabaseManager.class.getResourceAsStream(path))
-		{
-			if (r == null)
-			{
-				throw new RuntimeException("Couldn't find file " + path);
-			}
-			return convertStreamToString(r);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(String.format("ioe on %s : %s ", path,
-					e.getMessage()));
-		}
-	}
-
 	static
 	{
-		providerQuery = loadFile("/sql/provider.sql");
-		providerByPayorQuery = loadFile("/sql/provider-by-payor.sql");
-		providerBySpecialtyQuery = loadFile("/sql/provider-by-specialty.sql");
-		providerByCoordinate = loadFile("/sql/provider-by-coord.sql");
+		providerQuery = loadQuery("provider");
+		providerByPayorQuery = loadQuery("provider-by-payor");
+		providerBySpecialtyQuery = loadQuery("provider-by-specialty");
+		providerByCoordinate = loadQuery("provider-by-coord");
 	}
 
 	private class Handler extends BaseServletHandler

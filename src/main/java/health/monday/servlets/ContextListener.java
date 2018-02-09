@@ -25,6 +25,5 @@ public class ContextListener implements ServletContextListener
 	public void contextDestroyed(ServletContextEvent contextEvent)
 	{
 		DatabaseManager.getInstance().destroy();
-		FixtureManager.getInstance().destroy();
 	}
 }

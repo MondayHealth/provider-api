@@ -10,9 +10,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet(name = "SpecialtiesFixture",
-			urlPatterns = {"/fixtures/specialties"})
-public class SpecialtiesFixtureServlet extends BaseHTTPServlet
+@WebServlet(name = "Fixtures", urlPatterns = {"/fixtures/*"})
+public class FixturesServlet extends BaseHTTPServlet
 {
 	private class Handler extends BaseServletHandler
 	{
@@ -24,7 +23,8 @@ public class SpecialtiesFixtureServlet extends BaseHTTPServlet
 
 		public void get() throws IOException
 		{
-			success(FixtureManager.getInstance().getSpecialties());
+			final String[] tokens = getPathComponents();
+			success(FixtureManager.getInstance().getFixtureByName(tokens[1]));
 		}
 	}
 
@@ -36,4 +36,3 @@ public class SpecialtiesFixtureServlet extends BaseHTTPServlet
 		return new Handler(request, response);
 	}
 }
-

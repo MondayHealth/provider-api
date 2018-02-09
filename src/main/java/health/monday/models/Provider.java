@@ -74,10 +74,7 @@ public class Provider
 				continue;
 			}
 
-			String[] tokens = addy.split("\\|");
-			final double lng = Double.parseDouble(tokens[1]);
-			final double lat = Double.parseDouble(tokens[2]);
-			addresses[idx++] = new Address(tokens[0], lat, lng);
+			addresses[idx++] = new Address(addy);
 		}
 	}
 }

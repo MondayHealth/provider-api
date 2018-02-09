@@ -88,11 +88,16 @@ public class ProviderDetail
 		ageGroups = a != null ? (String[]) a.getArray() : new String[0];
 
 		a = r.getArray("age_ranges");
-		final Object[] pgo = (Object[]) a.getArray();
-		ageRanges = new String[pgo.length];
-		for (int i = 0; i < pgo.length; i++)
+		if (a != null)
 		{
-			ageRanges[i] = ((PGobject) pgo[i]).getValue();
+			final Object[] pgo = (Object[]) a.getArray();
+			ageRanges = new String[pgo.length];
+			for (int i = 0; i < pgo.length; i++)
+			{
+				ageRanges[i] = ((PGobject) pgo[i]).getValue();
+			}
+		} else {
+			ageRanges = new String[0];
 		}
 
 		a = r.getArray("specialties");

@@ -27,6 +27,7 @@ SELECT
         WHERE provider_id = pro.id)             AS orientations,
   ARRAY(SELECT
           addy.formatted || '|' || st_x(addy.point) || '|' || st_y(addy.point)
+          || '|' || coalesce(addy.directory_id, -1)
         FROM monday.providers_addresses pa
           JOIN monday.address addy ON pa.address_id = addy.id
         WHERE pa.provider_id = pro.id AND addy.formatted IS NOT

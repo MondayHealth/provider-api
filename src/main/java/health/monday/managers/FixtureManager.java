@@ -24,7 +24,7 @@ public class FixtureManager
 			"SELECT id, acronym FROM monday.degree";
 
 	private static final String LANGUAGES_QUERY =
-			"SELECT id, acronym FROM monday.language";
+			"SELECT id, name FROM monday.language";
 
 	private static final String PAYOR_NAMES_QUERY =
 			"SELECT	id, name FROM monday.payor";

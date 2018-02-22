@@ -33,6 +33,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerByLanguage;
 
+	private static final String providerByModality;
+
 	private static final double MILE_IN_METERS = 1609.34;
 
 	private static final double MIN_RADIUS_METERS = 500;
@@ -46,6 +48,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		providerBySpecialtyQuery = loadQuery("provider-by-specialty");
 		providerByCoordinate = loadQuery("provider-by-coord");
 		providerByLanguage = loadQuery("provider-by-language");
+		providerByModality = loadQuery("provider-by-modality");
 	}
 
 	private class Handler extends BaseServletHandler
@@ -63,6 +66,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
+			final int modality = intParameter("modality", 0);
 			final String feeRange = stringParameter("feeRange", null);
 			final int gender = intParameter("gender", 0);
 			final int language = intParameter("language", 0);
@@ -142,6 +146,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
+			if (modality > 0)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN (" + providerByModality + ") ";
+				whereClauses += 1;
+			}
+
 			query += " ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
 
 			try (final Connection conn = DatabaseManager.connection())
@@ -182,6 +193,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				if (language > 0)
 				{
 					s.setInt(idx++, language);
+				}
+
+				if (modality > 0)
+				{
+					s.setInt(idx++, modality);
 				}
 
 				s.setInt(idx++, count);

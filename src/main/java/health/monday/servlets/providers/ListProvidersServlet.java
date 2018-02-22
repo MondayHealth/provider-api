@@ -13,7 +13,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -62,6 +61,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
 			final String feeRange = stringParameter("feeRange", null);
+			final int gender = intParameter("gender", 0);
 			final Double lat = doubleOrNullParameter("lat");
 			final Double lng = doubleOrNullParameter("lng");
 			final Double radius = doubleParameter("radius", MILE_IN_METERS);
@@ -91,7 +91,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				query += " WHERE pro.id IN (";
 				query += providerByPayorQuery;
 				query += ") ";
-				whereClauses+= 1;
+				whereClauses += 1;
 			}
 
 			if (specialty > 0)
@@ -100,7 +100,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				query += "pro.id IN (";
 				query += providerBySpecialtyQuery;
 				query += ") ";
-				whereClauses+= 1;
+				whereClauses += 1;
 			}
 
 			if (lat != null)
@@ -109,14 +109,26 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				query += "pro.id IN (";
 				query += providerByCoordinate;
 				query += ") ";
-				whereClauses +=1;
+				whereClauses += 1;
 			}
 
 			if (feeRange != null)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.minimum_fee >= ? and pro.maximum_fee <= ? ";
-				whereClauses +=1;
+				whereClauses += 1;
+			}
+
+			if (gender > 0)
+			{
+				if (gender > 2)
+				{
+					throw new SQLException("Invalid gender index " + gender);
+				}
+
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.gender = ?";
+				whereClauses += 1;
 			}
 
 			query += " ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
@@ -149,6 +161,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 					final String[] tokens = feeRange.split(",");
 					s.setInt(idx++, Integer.parseInt(tokens[0]));
 					s.setInt(idx++, Integer.parseInt(tokens[1]));
+				}
+
+				if (gender > 0)
+				{
+					s.setString(idx++, gender == 1 ? "F" : "M");
 				}
 
 				s.setInt(idx++, count);

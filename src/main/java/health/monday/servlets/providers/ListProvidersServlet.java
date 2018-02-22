@@ -68,6 +68,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int specialty = intParameter("specialty", 0);
 			final int modality = intParameter("modality", 0);
 			final String feeRange = stringParameter("feeRange", null);
+			final boolean contact = boolParameter("contact");
 			final int gender = intParameter("gender", 0);
 			final int language = intParameter("language", 0);
 			final Double lat = doubleOrNullParameter("lat");
@@ -150,6 +151,15 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (" + providerByModality + ") ";
+				whereClauses += 1;
+			}
+
+			if (contact)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "(pro.id IN ";
+				query += "(SELECT provider_id FROM monday.providers_phones) ";
+				query += "OR email IS NOT NULL) ";
 				whereClauses += 1;
 			}
 

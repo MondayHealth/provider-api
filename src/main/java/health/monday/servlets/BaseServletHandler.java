@@ -175,6 +175,37 @@ abstract public class BaseServletHandler
 		return ret == null ? defaultValue : Integer.parseInt(ret);
 	}
 
+	/**
+	 * @param name The name of the parameter
+	 *
+	 * @return {@code true} IFF the value of the parameter is either "true" or
+	 * 		an int not equal to zero, otherwise return {@code false}.
+	 */
+	protected boolean boolParameter(final String name)
+	{
+		final String ret = request.getParameter(name);
+
+		if (ret == null)
+		{
+			return false;
+		}
+
+		if (ret.toLowerCase().equals("true"))
+		{
+			return true;
+		}
+
+		try
+		{
+			return Integer.parseInt(ret) != 0;
+		}
+		catch (NumberFormatException ignored)
+		{
+		}
+
+		return false;
+	}
+
 	protected double doubleParameter(final String name,
 									 final double defaultValue)
 	{

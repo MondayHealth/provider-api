@@ -61,6 +61,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			final int offset = requireInt("offset");
 			final int payor = intParameter("payor", 0);
 			final int specialty = intParameter("specialty", 0);
+			final String feeRange = stringParameter("feeRange", null);
 			final Double lat = doubleOrNullParameter("lat");
 			final Double lng = doubleOrNullParameter("lng");
 			final Double radius = doubleParameter("radius", MILE_IN_METERS);
@@ -83,27 +84,39 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			String query = providerQuery;
 
+			int whereClauses = 0;
+
 			if (payor > 0)
 			{
 				query += " WHERE pro.id IN (";
 				query += providerByPayorQuery;
 				query += ") ";
+				whereClauses+= 1;
 			}
 
 			if (specialty > 0)
 			{
-				query += payor > 0 ? " AND " : " WHERE ";
+				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (";
 				query += providerBySpecialtyQuery;
 				query += ") ";
+				whereClauses+= 1;
 			}
 
 			if (lat != null)
 			{
-				query += (payor > 0 || specialty > 0) ? " AND " : " WHERE ";
+				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (";
 				query += providerByCoordinate;
 				query += ") ";
+				whereClauses +=1;
+			}
+
+			if (feeRange != null)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.minimum_fee >= ? and pro.maximum_fee <= ? ";
+				whereClauses +=1;
 			}
 
 			query += " ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
@@ -129,6 +142,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 					s.setDouble(idx++, lng);
 					s.setDouble(idx++, lat);
 					s.setDouble(idx++, radius);
+				}
+
+				if (feeRange != null)
+				{
+					final String[] tokens = feeRange.split(",");
+					s.setInt(idx++, Integer.parseInt(tokens[0]));
+					s.setInt(idx++, Integer.parseInt(tokens[1]));
 				}
 
 				s.setInt(idx++, count);

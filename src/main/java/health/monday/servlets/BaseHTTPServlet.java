@@ -63,5 +63,5 @@ public abstract class BaseHTTPServlet extends HttpServlet
 														final
 														HttpServletResponse
 																response)
-			throws InvalidCertificateException;
+			throws ServletException;
 }

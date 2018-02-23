@@ -3,6 +3,7 @@ package health.monday.servlets;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import health.monday.exceptions.InvalidCertificateException;
+import health.monday.exceptions.InvalidParameterException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -41,8 +42,10 @@ abstract public class BaseServletHandler
 
 	private class Response
 	{
+		@SuppressWarnings("unused")
 		final private boolean success;
 
+		@SuppressWarnings("unused")
 		final private Object result;
 
 		Response(boolean s, Object o)
@@ -141,13 +144,13 @@ abstract public class BaseServletHandler
 		response.getWriter().print(serializer.toJson(result));
 	}
 
-	protected String requireParameter(final String name) throws
-			ServletException
+	private String requireParameter(final String name)
+			throws InvalidParameterException
 	{
 		final String ret = request.getParameter(name);
 		if (ret == null)
 		{
-			throw new ServletException("Missing required parameter: " + name);
+			throw new InvalidParameterException(name, "required");
 		}
 		return ret;
 	}
@@ -157,7 +160,8 @@ abstract public class BaseServletHandler
 		return request.getPathInfo().split("/");
 	}
 
-	protected int requireInt(final String name) throws ServletException
+	protected int requireInt(final String name) throws
+			InvalidParameterException
 	{
 		return Integer.parseInt(requireParameter(name));
 	}

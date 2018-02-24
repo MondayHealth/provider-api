@@ -36,3 +36,11 @@ internal address of the db server you're trying to connect to.
 # Deploy script
 1. You need to have the root key in a known location
 2. `pip3 install requests[socks]` 
+
+
+# Security
+I am aware of only one glaring security issue at the moment, and that is that
+i am unsure if it's a good idea to allow any set of chars into a tsvector. As
+far as I can tell, bad chars just cause the query to fail to exec, but perhaps
+in the future it should be sanetized? This application assumes that the user is
+granted with a TLSx509 key by hand anyway so maybe this doesn't matter.

@@ -36,6 +36,10 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerByModality;
 
+	private static final String providerByGroup;
+
+	private static final String providerByOrientation;
+
 	private static final double MILE_IN_METERS = 1609.34;
 
 	private static final double MIN_RADIUS_METERS = 500;
@@ -50,6 +54,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		providerByCoordinate = loadQuery("provider-by-coord");
 		providerByLanguage = loadQuery("provider-by-language");
 		providerByModality = loadQuery("provider-by-modality");
+		providerByGroup = loadQuery("provider-by-group");
+		providerByOrientation = loadQuery("provider-by-orientation");
 	}
 
 	private static class Response
@@ -95,6 +101,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final Double radius;
 
+		private final String[] keywords;
+
 		private final String queryConstraints;
 
 		Handler(HttpServletRequest req, HttpServletResponse resp)
@@ -118,6 +126,9 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			lat = doubleOrNullParameter("lat");
 			lng = doubleOrNullParameter("lng");
 			radius = doubleParameter("radius", MILE_IN_METERS);
+
+			final String raw = stringParameter("keywords", null);
+			keywords = raw != null ? raw.split(" ") : new String[0];
 
 			checkParameters();
 
@@ -194,6 +205,14 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
+			if (keywords.length > 0)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN (" + providerByGroup + ") ";
+				query += "OR pro.id IN (" + providerByOrientation + ") ";
+				whereClauses += 1;
+			}
+
 			return query;
 		}
 
@@ -263,6 +282,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (modality > 0)
 			{
 				s.setInt(idx++, modality);
+			}
+
+			if (keywords.length > 0)
+			{
+				final String tsquery = String.join(":* & ", keywords) + ":*";
+				s.setString(idx++, tsquery);
+				s.setString(idx++, tsquery);
 			}
 
 			return idx;

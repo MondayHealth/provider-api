@@ -18,6 +18,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 @WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
 public class ListProvidersServlet extends BaseHTTPServlet
@@ -81,7 +83,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final int payor;
 
-		private final int specialty;
+		private final Integer[] specialties;
 
 		private final int modality;
 
@@ -116,7 +118,6 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			// Generally optional, but may have semantics
 			payor = intParameter("payor", 0);
-			specialty = intParameter("specialty", 0);
 			modality = intParameter("modality", 0);
 			feeRange = stringParameter("feeRange", null);
 			contact = boolParameter("contact");
@@ -129,6 +130,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			final String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
+
+			final String[] raws = stringParameter("specialty", "").split(",");
+			specialties = new Integer[raws.length];
+			for (int i = 0; i < raws.length; i++)
+			{
+				specialties[i] = Integer.parseInt(raws[i]);
+			}
 
 			checkParameters();
 
@@ -147,10 +155,25 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
-			if (specialty > 0)
+			if (specialties.length == 1)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (" + providerBySpecialtyQuery + ") ";
+				whereClauses += 1;
+			}
+			else if (specialties.length > 0)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN ( SELECT provider_id FROM " +
+						"monday.providers_specialties WHERE specialty_id IN (";
+
+				query += Arrays.stream(specialties)
+						.map(Object::toString)
+						.collect(Collectors.joining(","));
+
+				query += ") GROUP BY provider_id HAVING count(provider_id) =" +
+						specialties.length +
+						") ";
 				whereClauses += 1;
 			}
 
@@ -210,6 +233,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (" + providerByGroup + ") ";
 				query += "OR pro.id IN (" + providerByOrientation + ") ";
+				//noinspection UnusedAssignment
 				whereClauses += 1;
 			}
 
@@ -238,6 +262,16 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				throw new InvalidParameterException("gender", "value: " +
 						gender);
 			}
+
+			for (final Integer specialty : specialties)
+			{
+				if (specialty < 1 || specialty > 9999)
+				{
+					throw new InvalidParameterException("specialty",
+							"invalid int: " +
+									specialty);
+				}
+			}
 		}
 
 		private int setStatementValues(final PreparedStatement s)
@@ -250,9 +284,9 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				s.setInt(idx++, payor);
 			}
 
-			if (specialty > 0)
+			if (specialties.length == 1)
 			{
-				s.setInt(idx++, specialty);
+				s.setInt(idx++, specialties[0]);
 			}
 
 			if (lat != null)
@@ -311,7 +345,10 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			try (final Connection conn = DatabaseManager.connection())
 			{
 				PreparedStatement c = conn.prepareStatement(countQuery);
+
 				setStatementValues(c);
+
+				logger.info(c);
 				ResultSet r = c.executeQuery();
 				if (!r.next())
 				{

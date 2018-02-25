@@ -1,6 +1,5 @@
 package health.monday.servlets;
 
-import health.monday.exceptions.InvalidCertificateException;
 import health.monday.managers.DatabaseManager;
 
 import javax.servlet.ServletException;

@@ -128,14 +128,24 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			lng = doubleOrNullParameter("lng");
 			radius = doubleParameter("radius", MILE_IN_METERS);
 
-			final String raw = stringParameter("keywords", null);
+			String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
 
-			final String[] raws = stringParameter("specialty", "").split(",");
-			specialties = new Integer[raws.length];
-			for (int i = 0; i < raws.length; i++)
+			raw = stringParameter("specialty", null);
+
+			if (raw == null)
 			{
-				specialties[i] = Integer.parseInt(raws[i]);
+				specialties = new Integer[0];
+			} else {
+				final String[] raws = raw.split(",");
+				specialties = new Integer[raws.length];
+				for (int i = 0; i < raws.length; i++)
+				{
+					if (!raws[i].isEmpty())
+					{
+						specialties[i] = Integer.parseInt(raws[i]);
+					}
+				}
 			}
 
 			checkParameters();

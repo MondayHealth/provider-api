@@ -131,7 +131,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
 
-			raw = stringParameter("specialty", null);
+			raw = stringParameter("specialties", null);
 
 			if (raw == null)
 			{

@@ -19,6 +19,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.stream.Collectors;
 
 @WebServlet(name = "ListProviders", urlPatterns = {"/providers/list"})
@@ -103,6 +104,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final Double radius;
 
+		private final int practiceAge;
+
 		private final String[] keywords;
 
 		private final String queryConstraints;
@@ -127,6 +130,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			lat = doubleOrNullParameter("lat");
 			lng = doubleOrNullParameter("lng");
 			radius = doubleParameter("radius", MILE_IN_METERS);
+			practiceAge = intParameter("practiceAge", 0);
 
 			String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
@@ -136,7 +140,9 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (raw == null)
 			{
 				specialties = new Integer[0];
-			} else {
+			}
+			else
+			{
 				final String[] raws = raw.split(",");
 				specialties = new Integer[raws.length];
 				for (int i = 0; i < raws.length; i++)
@@ -238,6 +244,15 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
+			if (practiceAge > 0)
+			{
+				final int year = Calendar.getInstance().get(Calendar.YEAR);
+				final int targetYear = year - practiceAge;
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "began_practice <= " + targetYear;
+				whereClauses += 1;
+			}
+
 			if (keywords.length > 0)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
@@ -271,6 +286,12 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			{
 				throw new InvalidParameterException("gender", "value: " +
 						gender);
+			}
+
+			if (practiceAge < 0 || practiceAge > 999)
+			{
+				throw new InvalidParameterException("practiceAge",
+						"value:" + practiceAge);
 			}
 
 			for (final Integer specialty : specialties)

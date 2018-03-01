@@ -1,5 +1,6 @@
 package health.monday.managers;
 
+import health.monday.models.Plan;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,9 +45,6 @@ public class FixtureManager
 	private static final String DIRECTORY_NAMES_QUERY =
 			"SELECT id, name FROM monday.directory";
 
-	private static final String PLAN_NAMES_QUERY =
-			"SELECT id, name FROM monday.plan";
-
 	private static final String PAYMENT_TYPE_QUERY =
 			"SELECT id, payment_type FROM monday.payment_method";
 
@@ -66,7 +64,7 @@ public class FixtureManager
 
 	private Map<Integer, String> directories = new HashMap<>();
 
-	private Map<Integer, String> plans = new HashMap<>();
+	private Map<Integer, Plan> plans = new HashMap<>();
 
 	private Map<Integer, String> licensors = new HashMap<>();
 
@@ -102,8 +100,9 @@ public class FixtureManager
 			specialties = mapForQuery(conn, SPECIALTY_NAMES_QUERY);
 			paymentTypes = mapForQuery(conn, PAYMENT_TYPE_QUERY);
 			directories = mapForQuery(conn, DIRECTORY_NAMES_QUERY);
-			plans = mapForQuery(conn, PLAN_NAMES_QUERY);
 			licensors = mapForQuery(conn, LICENSOR_NAMES_QUERY);
+
+			plans = Plan.loadAll(conn);
 		}
 
 		logger.info("Reloaded.");
@@ -127,7 +126,7 @@ public class FixtureManager
 	}
 
 	@SuppressWarnings("AssignmentOrReturnOfFieldWithMutableType")
-	public Map<Integer, String> getFixtureByName(final String name)
+	public Map getFixtureByName(final String name)
 	{
 		switch (name.toLowerCase())
 		{

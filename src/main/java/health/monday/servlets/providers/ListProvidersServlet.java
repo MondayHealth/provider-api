@@ -379,7 +379,6 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 				setStatementValues(c);
 
-				logger.info(c);
 				ResultSet r = c.executeQuery();
 				if (!r.next())
 				{

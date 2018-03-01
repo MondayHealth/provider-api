@@ -31,6 +31,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerByPayorQuery;
 
+	private static final String providerByPlanQuery;
+
 	private static final String providerBySpecialtyQuery;
 
 	private static final String providerByCoordinate;
@@ -53,6 +55,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 	{
 		providerQuery = loadQuery("provider");
 		providerByPayorQuery = loadQuery("provider-by-payor");
+		providerByPlanQuery = loadQuery("provider-by-plan");
 		providerBySpecialtyQuery = loadQuery("provider-by-specialty");
 		providerByCoordinate = loadQuery("provider-by-coord");
 		providerByLanguage = loadQuery("provider-by-language");
@@ -83,6 +86,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		private final int offset;
 
 		private final int payor;
+
+		private final int plan;
 
 		private final Integer[] specialties;
 
@@ -121,6 +126,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			// Generally optional, but may have semantics
 			payor = intParameter("payor", 0);
+			plan = intParameter("plan", 0);
 			modality = intParameter("modality", 0);
 			feeRange = stringParameter("feeRange", null);
 			contact = boolParameter("contact");
@@ -253,6 +259,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
+			if (plan > 0)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN (" + providerByPlanQuery + ") ";
+				whereClauses += 1;
+			}
+
 			if (keywords.length > 0)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
@@ -270,6 +283,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (lat == null ^ lng == null)
 			{
 				throw new InvalidParameterException("lat/lng", "pairing");
+			}
+
+			if (plan > 0 && payor > 0)
+			{
+				throw new IllegalStateException("Cant have plan and payor.");
 			}
 
 			if (radius > MAX_RADIUS_METERS)
@@ -290,8 +308,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 			if (practiceAge < 0 || practiceAge > 999)
 			{
-				throw new InvalidParameterException("practiceAge",
-						"value:" + practiceAge);
+				throw new InvalidParameterException("practiceAge", "value:" +
+						practiceAge);
 			}
 
 			for (final Integer specialty : specialties)
@@ -347,6 +365,11 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (modality > 0)
 			{
 				s.setInt(idx++, modality);
+			}
+
+			if (plan > 0)
+			{
+				s.setInt(idx++, plan);
 			}
 
 			if (keywords.length > 0)

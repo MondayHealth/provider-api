@@ -64,6 +64,10 @@ public class ProviderDetail
 
 	private final License[] licenses;
 
+	private final String email;
+
+	private final PhoneNumber[] phones;
+
 	public ProviderDetail(final ResultSet r) throws SQLException
 	{
 		id = r.getLong("id");
@@ -80,6 +84,7 @@ public class ProviderDetail
 		school = r.getString("school");
 		yearGraduated = r.getInt("year_graduated");
 		gender = r.getString("gender");
+		email = r.getString("email");
 
 		Array a = r.getArray("credentials");
 		credentials = (Integer[]) a.getArray();
@@ -96,7 +101,9 @@ public class ProviderDetail
 			{
 				ageRanges[i] = ((PGobject) pgo[i]).getValue();
 			}
-		} else {
+		}
+		else
+		{
 			ageRanges = new String[0];
 		}
 
@@ -126,6 +133,9 @@ public class ProviderDetail
 
 		a = r.getArray("apc");
 		acceptedPayorComments = (String[]) a.getArray();
+
+		a = r.getArray("phones");
+		phones = PhoneNumber.getNumbers((String[]) a.getArray());
 
 		a = r.getArray("addresses");
 		String[] addys = (String[]) a.getArray();

@@ -53,6 +53,11 @@ SELECT
                  THEN ' ext. ' || phone.extension
                ELSE ''
                END
+               || '|' ||
+               CASE WHEN phone.directory IS NOT NULL
+                 THEN phone.directory
+               ELSE -1
+               END
         FROM monday.providers_phones p_phones
           JOIN monday.phone phone ON p_phones.phone_id = phone.id
         WHERE p_phones.provider_id = pro.id)    AS phones

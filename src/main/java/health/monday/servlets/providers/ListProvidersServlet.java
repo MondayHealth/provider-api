@@ -272,7 +272,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (hasWebsite)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
-				query += "email IS NOT NULL ";
+				query += "website_url IS NOT NULL ";
 				whereClauses += 1;
 			}
 

@@ -99,6 +99,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final boolean freeConsult;
 
+		private final boolean hasWebsite;
+
 		private final int gender;
 
 		private final int language;
@@ -130,6 +132,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			modality = intParameter("modality", 0);
 			feeRange = stringParameter("feeRange", null);
 			contact = boolParameter("contact");
+			hasWebsite = boolParameter("website");
 			freeConsult = boolParameter("freeConsult");
 			gender = intParameter("gender", 0);
 			language = intParameter("language", 0);
@@ -263,6 +266,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
 				query += "pro.id IN (" + providerByPlanQuery + ") ";
+				whereClauses += 1;
+			}
+
+			if (hasWebsite)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "email IS NOT NULL ";
 				whereClauses += 1;
 			}
 

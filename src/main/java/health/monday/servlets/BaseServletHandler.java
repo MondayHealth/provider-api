@@ -67,13 +67,8 @@ abstract public class BaseServletHandler
 		}
 	}
 
-	protected BaseServletHandler(final HttpServletRequest req,
-								 final HttpServletResponse resp)
-			throws InvalidCertificateException
+	private String[] auth() throws InvalidCertificateException
 	{
-		request = req;
-		response = resp;
-
 		final String cert = request.getHeader("x-ssl-s-dn");
 
 		if (cert == null)
@@ -90,14 +85,33 @@ abstract public class BaseServletHandler
 			throw new InvalidCertificateException(cert);
 		}
 
-		emailAddress = emailTokens[1];
+		final String[] ret = new String[2];
+		ret[0] = emailTokens[1];
 
 		if (commonNameTokens.length != 2 || !commonNameTokens[0].equals("CN"))
 		{
 			throw new InvalidCertificateException(cert);
 		}
 
-		userName = commonNameTokens[1];
+		ret[1] = commonNameTokens[1];
+
+		return ret;
+	}
+
+	protected BaseServletHandler(final HttpServletRequest req,
+								 final HttpServletResponse resp)
+			throws InvalidCertificateException
+	{
+		request = req;
+		response = resp;
+
+		//final String[] tokens = auth();
+		//emailAddress = tokens[0];
+		//userName = tokens[1];
+
+		// Disabled for YC 2018 application
+		emailAddress = "(None)";
+		userName = "(None)";
 
 		response.setCharacterEncoding("utf-8");
 		response.setContentType("application/json");

@@ -212,7 +212,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (feeRange != null)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
-				query += "pro.minimum_fee >= ? and pro.maximum_fee <= ? ";
+				query += "pro.minimum_fee <= ? and pro.maximum_fee <= ? ";
 				whereClauses += 1;
 			}
 

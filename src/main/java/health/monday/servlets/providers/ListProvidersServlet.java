@@ -29,6 +29,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerQuery;
 
+	private static final String providerByNameQuery;
+
 	private static final String providerByPayorQuery;
 
 	private static final String providerByPlanQuery;
@@ -54,6 +56,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 	static
 	{
 		providerQuery = loadQuery("provider");
+		providerByNameQuery = loadQuery("provider-by-name");
 		providerByPayorQuery = loadQuery("provider-by-payor");
 		providerByPlanQuery = loadQuery("provider-by-plan");
 		providerBySpecialtyQuery = loadQuery("provider-by-specialty");
@@ -117,6 +120,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final String queryConstraints;
 
+		private final String name;
+
 		Handler(HttpServletRequest req, HttpServletResponse resp)
 				throws InvalidParameterException, InvalidCertificateException
 		{
@@ -140,6 +145,7 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			lng = doubleOrNullParameter("lng");
 			radius = doubleParameter("radius", MILE_IN_METERS);
 			practiceAge = intParameter("practiceAge", 0);
+			name = stringParameter("name", null);
 
 			String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
@@ -276,6 +282,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
+			if (name != null)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "first_name ILIKE ? OR last_name ILIKE ? ";
+				whereClauses += 1;
+			}
+
 			if (keywords.length > 0)
 			{
 				query += whereClauses > 0 ? " AND " : " WHERE ";
@@ -333,10 +346,10 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			}
 		}
 
-		private int setStatementValues(final PreparedStatement s)
+		private int setStatementValues(final PreparedStatement s, int start)
 				throws SQLException
 		{
-			int idx = 1;
+			int idx = start;
 
 			if (payor > 0)
 			{
@@ -382,6 +395,13 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				s.setInt(idx++, plan);
 			}
 
+			if (name != null)
+			{
+				final String fuzzy = "%" + name + "%";
+				s.setString(idx++, fuzzy);
+				s.setString(idx++, fuzzy);
+			}
+
 			if (keywords.length > 0)
 			{
 				final String tsquery = String.join(":* & ", keywords) + ":*";
@@ -392,44 +412,85 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			return idx;
 		}
 
-		public void get() throws IOException, SQLException
+		private int getCount(final Connection conn) throws SQLException
 		{
-			final Provider[] result = new Provider[count];
-
-			final String query = providerQuery +
-					queryConstraints +
-					" ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
-
-			final String countQuery =
+			final String query =
 					"SELECT COUNT(pro.id) FROM monday.provider pro " +
 							queryConstraints;
+
+			final PreparedStatement c = conn.prepareStatement(query);
+			setStatementValues(c, 1);
+
+			ResultSet r = c.executeQuery();
+			if (!r.next())
+			{
+				throw new SQLException("No count results!");
+			}
+			return r.getInt(1);
+		}
+
+		private Provider[] getProviders(final Connection conn,
+										final long resultCount)
+				throws SQLException
+		{
+			final String query;
+
+			//noinspection IfMayBeConditional
+			if (name == null)
+			{
+				query = providerQuery +
+						queryConstraints +
+						" ORDER BY pro.last_name ASC LIMIT ? OFFSET ? ";
+			}
+			else
+			{
+				query = providerByNameQuery +
+						queryConstraints +
+						" ORDER BY lsim DESC, fsim DESC, pro.last_name ASC " +
+						"LIMIT ? OFFSET ?";
+			}
+
+			final PreparedStatement s = conn.prepareStatement(query);
+
+			int idx = 1;
+
+			if (name != null)
+			{
+				s.setString(idx++, name);
+				s.setString(idx++, name);
+			}
+
+			idx = setStatementValues(s, idx);
+
+			s.setInt(idx++, count);
+			s.setInt(idx, offset);
+
+			logger.debug(s);
+
+			final long computed = Math.min(resultCount, count);
+			final Provider[] result = new Provider[Math.toIntExact(computed)];
+
+			ResultSet r = s.executeQuery();
+
+			int i = 0;
+			while (r.next())
+			{
+				result[i++] = new Provider(r);
+			}
+
+			return result;
+		}
+
+		public void get() throws IOException, SQLException
+		{
+			final Provider[] result;
 
 			final long resultCount;
 
 			try (final Connection conn = DatabaseManager.connection())
 			{
-				PreparedStatement c = conn.prepareStatement(countQuery);
-
-				setStatementValues(c);
-
-				ResultSet r = c.executeQuery();
-				if (!r.next())
-				{
-					throw new SQLException("No count results!");
-				}
-				resultCount = r.getInt(1);
-
-				PreparedStatement s = conn.prepareStatement(query);
-				int idx = setStatementValues(s);
-				s.setInt(idx++, count);
-				s.setInt(idx, offset);
-				logger.debug(s);
-				r = s.executeQuery();
-				int i = 0;
-				while (r.next())
-				{
-					result[i++] = new Provider(r);
-				}
+				resultCount = getCount(conn);
+				result = getProviders(conn, resultCount);
 			}
 
 			success(new Response(result, resultCount));

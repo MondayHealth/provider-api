@@ -37,6 +37,10 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 	private static final String providerBySpecialtyQuery;
 
+	private static final String providerByDegreeQuery;
+
+	private static final String providerByCredentialQuery;
+
 	private static final String providerByCoordinate;
 
 	private static final String providerByLanguage;
@@ -60,6 +64,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		providerByPayorQuery = loadQuery("provider-by-payor");
 		providerByPlanQuery = loadQuery("provider-by-plan");
 		providerBySpecialtyQuery = loadQuery("provider-by-specialty");
+		providerByDegreeQuery = loadQuery("provider-by-degree");
+		providerByCredentialQuery = loadQuery("provider-by-credential");
 		providerByCoordinate = loadQuery("provider-by-coord");
 		providerByLanguage = loadQuery("provider-by-language");
 		providerByModality = loadQuery("provider-by-modality");
@@ -94,6 +100,10 @@ public class ListProvidersServlet extends BaseHTTPServlet
 
 		private final Integer[] specialties;
 
+		private final Integer[] degrees;
+
+		private final Integer[] credentials;
+
 		private final int modality;
 
 		private final String feeRange;
@@ -121,6 +131,8 @@ public class ListProvidersServlet extends BaseHTTPServlet
 		private final String queryConstraints;
 
 		private final String name;
+
+		private int whereClauses = 0;
 
 		Handler(HttpServletRequest req, HttpServletResponse resp)
 				throws InvalidParameterException, InvalidCertificateException
@@ -150,35 +162,81 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			String raw = stringParameter("keywords", null);
 			keywords = raw != null ? raw.split(" ") : new String[0];
 
-			raw = stringParameter("specialties", null);
-
-			if (raw == null)
-			{
-				specialties = new Integer[0];
-			}
-			else
-			{
-				final String[] raws = raw.split(",");
-				specialties = new Integer[raws.length];
-				for (int i = 0; i < raws.length; i++)
-				{
-					if (!raws[i].isEmpty())
-					{
-						specialties[i] = Integer.parseInt(raws[i]);
-					}
-				}
-			}
+			specialties = getMultiParameter("specialties");
+			degrees = getMultiParameter("degrees");
+			credentials = getMultiParameter("credentials");
 
 			checkParameters();
 
 			queryConstraints = getQueryConstraints();
 		}
 
-		private String getQueryConstraints()
+		private Integer[] getMultiParameter(final String name)
+		{
+			final String raw = stringParameter(name, null);
+
+			final Integer[] ret;
+
+			if (raw == null)
+			{
+				ret = new Integer[0];
+			}
+			else
+			{
+				final String[] raws = raw.split(",");
+				ret = new Integer[raws.length];
+				for (int i = 0; i < raws.length; i++)
+				{
+					if (!raws[i].isEmpty())
+					{
+						ret[i] = Integer.parseInt(raws[i]);
+					}
+				}
+			}
+
+			return ret;
+		}
+
+		private String addIntListQuery(final Integer[] list,
+									   final String singleElementQuery,
+									   final String singular,
+									   final String plural)
 		{
 			String query = "";
 
-			int whereClauses = 0;
+			if (list.length == 1)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN (" + singleElementQuery + ") ";
+				whereClauses += 1;
+			}
+			else if (list.length > 0)
+			{
+				query += whereClauses > 0 ? " AND " : " WHERE ";
+				query += "pro.id IN ( SELECT provider_id FROM " +
+						"monday.providers_" +
+						plural +
+						"WHERE " +
+						singular +
+						"_id IN (";
+
+				query += Arrays.stream(list)
+						.map(Object::toString)
+						.collect(Collectors.joining(","));
+
+				query += ") GROUP BY provider_id HAVING count(provider_id) =" +
+						list.length +
+						") ";
+
+				whereClauses += 1;
+			}
+
+			return query;
+		}
+
+		private String getQueryConstraints()
+		{
+			String query = "";
 
 			if (payor > 0)
 			{
@@ -186,27 +244,17 @@ public class ListProvidersServlet extends BaseHTTPServlet
 				whereClauses += 1;
 			}
 
-			if (specialties.length == 1)
-			{
-				query += whereClauses > 0 ? " AND " : " WHERE ";
-				query += "pro.id IN (" + providerBySpecialtyQuery + ") ";
-				whereClauses += 1;
-			}
-			else if (specialties.length > 0)
-			{
-				query += whereClauses > 0 ? " AND " : " WHERE ";
-				query += "pro.id IN ( SELECT provider_id FROM " +
-						"monday.providers_specialties WHERE specialty_id IN (";
+			query +=
+					addIntListQuery(specialties, providerBySpecialtyQuery,
+							"specialty", "specialties");
 
-				query += Arrays.stream(specialties)
-						.map(Object::toString)
-						.collect(Collectors.joining(","));
+			query +=
+					addIntListQuery(degrees, providerByDegreeQuery, "degree",
+							"degrees");
 
-				query += ") GROUP BY provider_id HAVING count(provider_id) =" +
-						specialties.length +
-						") ";
-				whereClauses += 1;
-			}
+			query +=
+					addIntListQuery(credentials, providerByCredentialQuery,
+							"credential", "credentials");
 
 			if (lat != null)
 			{
@@ -359,6 +407,16 @@ public class ListProvidersServlet extends BaseHTTPServlet
 			if (specialties.length == 1)
 			{
 				s.setInt(idx++, specialties[0]);
+			}
+
+			if (degrees.length == 1)
+			{
+				s.setInt(idx++, degrees[0]);
+			}
+
+			if (credentials.length == 1)
+			{
+				s.setInt(idx++, credentials[0]);
 			}
 
 			if (lat != null)

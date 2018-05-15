@@ -105,13 +105,9 @@ abstract public class BaseServletHandler
 		request = req;
 		response = resp;
 
-		//final String[] tokens = auth();
-		//emailAddress = tokens[0];
-		//userName = tokens[1];
-
-		// Disabled for YC 2018 application
-		emailAddress = "(None)";
-		userName = "(None)";
+		final String[] tokens = auth();
+		emailAddress = tokens[0];
+		userName = tokens[1];
 
 		response.setCharacterEncoding("utf-8");
 		response.setContentType("application/json");
